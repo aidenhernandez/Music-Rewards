@@ -8,15 +8,15 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { GlassCard, GlassButton } from '../../components/ui/GlassCard';
-import { useMusicPlayer } from '../../hooks/useMusicPlayer';
-import { useMusicStore, selectChallenges } from '../../stores/musicStore';
+import { useMusicStore, selectChallenges, selectCurrentTrack, selectIsPlaying } from '../../stores/musicStore';
 import { THEME } from '../../constants/theme';
 
 export default function ChallengeDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const challenges = useMusicStore(selectChallenges);
   const challenge = challenges.find((c) => c.id === id);
-  const { play, currentTrack, isPlaying } = useMusicPlayer();
+  const currentTrack = useMusicStore(selectCurrentTrack);
+  const isPlaying = useMusicStore(selectIsPlaying);
 
   if (!challenge) {
     return (
@@ -52,13 +52,8 @@ export default function ChallengeDetail() {
     return '▶ Play Challenge';
   };
 
-  const handlePlayPress = async () => {
-    if (isCurrentTrack && isPlaying) {
-      router.push('/(modals)/player');
-      return;
-    }
-    await play(challenge);
-    router.push('/(modals)/player');
+  const handlePlayPress = () => {
+    router.push(`/(modals)/player?id=${challenge.id}`);
   };
 
   return (

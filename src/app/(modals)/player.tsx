@@ -9,13 +9,18 @@ import {
   Alert,
   LayoutChangeEvent,
 } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { GlassCard, GlassButton } from '../../components/ui/GlassCard';
 import { PointsCounter } from '../../components/ui/PointsCounter';
 import { useMusicPlayer } from '../../hooks/useMusicPlayer';
 import { usePointsCounter } from '../../hooks/usePointsCounter';
+import { useMusicStore, selectChallenges } from '../../stores/musicStore';
 import { THEME } from '../../constants/theme';
 
 export default function PlayerModal() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const challenges = useMusicStore(selectChallenges);
+
   const {
     currentTrack,
     isPlaying,
@@ -31,6 +36,13 @@ export default function PlayerModal() {
 
   const { currentPoints, progress: pointsProgress, isActive, startCounting, stopCounting } = usePointsCounter();
   const [seekBarWidth, setSeekBarWidth] = useState(1);
+
+  useEffect(() => {
+    if (!id) return;
+    if (currentTrack?.id === id) return;
+    const challenge = challenges.find((c) => c.id === id);
+    if (challenge) play(challenge);
+  }, [id]);
 
   useEffect(() => {
     if (error) {
