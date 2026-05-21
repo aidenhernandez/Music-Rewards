@@ -3,12 +3,13 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { ChallengeList } from '../../components/challenge/ChallengeList';
-import { useMusicStore, selectChallenges, selectCurrentTrack, selectIsPlaying } from '../../stores/musicStore';
+import { useChallenges } from '../../hooks/useChallenges';
+import { useMusicStore, selectCurrentTrack, selectIsPlaying } from '../../stores/musicStore';
 import { THEME } from '../../constants/theme';
 import type { MusicChallenge } from '../../types';
 
 export default function HomeScreen() {
-  const challenges = useMusicStore(selectChallenges);
+  const { challenges, loading, error } = useChallenges();
   const currentTrack = useMusicStore(selectCurrentTrack);
   const isPlaying = useMusicStore(selectIsPlaying);
 
@@ -26,6 +27,8 @@ export default function HomeScreen() {
         challenges={challenges}
         currentTrackId={currentTrack?.id}
         isPlaying={isPlaying}
+        loading={loading}
+        error={error}
         onPlay={handlePlayChallenge}
       />
     </View>
