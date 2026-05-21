@@ -12,7 +12,7 @@ import {
 import { useLocalSearchParams } from 'expo-router';
 import { GlassCard, GlassButton } from '../../components/ui/GlassCard';
 import { PointsCounter } from '../../components/ui/PointsCounter';
-import { useMusicPlayer } from '../../hooks/useMusicPlayer';
+import { useMusicPlayerContext } from '../../contexts/MusicPlayerContext';
 import { usePointsCounter } from '../../hooks/usePointsCounter';
 import { useMusicStore, selectChallenges } from '../../stores/musicStore';
 import { THEME } from '../../constants/theme';
@@ -32,7 +32,7 @@ export default function PlayerModal() {
     seekTo,
     loading,
     error
-  } = useMusicPlayer();
+  } = useMusicPlayerContext();
 
   const { currentPoints, progress: pointsProgress, isActive, startCounting, stopCounting } = usePointsCounter();
   const [seekBarWidth, setSeekBarWidth] = useState(1);
@@ -196,7 +196,7 @@ export default function PlayerModal() {
               {currentTrack.completed ? '✅ Completed' : '🎧 In Progress'}
             </Text>
             <Text style={styles.challengeProgress}>
-              {Math.round(currentTrack.progress)}% of challenge complete
+              {Math.round(getProgress())}% of challenge complete
             </Text>
           </View>
         </GlassCard>

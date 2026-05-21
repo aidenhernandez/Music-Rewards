@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import TrackPlayer from 'react-native-track-player';
 import { setupTrackPlayer } from '../services/audioService';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
+import { MusicPlayerProvider } from '../contexts/MusicPlayerContext';
 
 TrackPlayer.registerPlaybackService(() => require('../services/playbackService'));
 
@@ -16,6 +17,7 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary fallbackMessage="The app encountered an unexpected error. Please restart.">
+      <MusicPlayerProvider>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
@@ -26,6 +28,7 @@ export default function RootLayout() {
           }}
         />
       </Stack>
+      </MusicPlayerProvider>
     </ErrorBoundary>
   );
 }
