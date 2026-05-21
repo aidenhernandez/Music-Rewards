@@ -1,12 +1,13 @@
 // Player modal - Full-screen audio player (Expo Router modal)
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  Alert
+  Alert,
+  LayoutChangeEvent,
 } from 'react-native';
 import { GlassCard, GlassButton } from '../../components/ui/GlassCard';
 import { PointsCounter } from '../../components/ui/PointsCounter';
@@ -29,6 +30,13 @@ export default function PlayerModal() {
   } = useMusicPlayer();
 
   const { currentPoints, progress: pointsProgress, isActive, startCounting, stopCounting } = usePointsCounter();
+  const [seekBarWidth, setSeekBarWidth] = useState(1);
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Playback Error', error);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (currentTrack) {
@@ -70,10 +78,6 @@ export default function PlayerModal() {
     }
   };
 
-  if (error) {
-    Alert.alert('Playback Error', error);
-  }
-
   if (!currentTrack) {
     return (
       <SafeAreaView style={styles.container}>
@@ -109,20 +113,19 @@ export default function PlayerModal() {
           <Text style={styles.progressLabel}>Listening Progress</Text>
           
           {/* Progress Bar */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.progressTrack}
             onPress={(event) => {
-              const { locationX, width } = event.nativeEvent as any;
-              const percentage = (locationX / width) * 100;
-              handleSeek(percentage);
+              const percentage = (event.nativeEvent.locationX / seekBarWidth) * 100;
+              handleSeek(Math.min(100, Math.max(0, percentage)));
             }}
           >
-            <View style={styles.progressBackground}>
-              <View 
-                style={[
-                  styles.progressFill,
-                  { width: `${getProgress()}%` }
-                ]} 
+            <View
+              style={styles.progressBackground}
+              onLayout={(e: LayoutChangeEvent) => setSeekBarWidth(e.nativeEvent.layout.width)}
+            >
+              <View
+                style={[styles.progressFill, { width: `${getProgress()}%` }]}
               />
             </View>
           </TouchableOpacity>

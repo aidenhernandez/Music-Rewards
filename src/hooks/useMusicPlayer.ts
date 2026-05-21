@@ -1,5 +1,5 @@
 // useMusicPlayer hook - Integrates react-native-track-player with Zustand
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import TrackPlayer, {
   State,
   usePlaybackState,
@@ -19,6 +19,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
   // Local state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const awardedChallenges = useRef<Set<string>>(new Set());
   
   // Zustand store selectors
   const currentTrack = useMusicStore(selectCurrentTrack);
@@ -54,7 +55,8 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
       updateProgress(currentTrack.id, progressPercentage);
       
       // Check if track is completed (90% threshold to account for small timing issues)
-      if (progressPercentage >= 90 && !currentTrack.completed) {
+      if (progressPercentage >= 90 && !awardedChallenges.current.has(currentTrack.id)) {
+        awardedChallenges.current.add(currentTrack.id);
         markChallengeComplete(currentTrack.id);
         completeChallenge(currentTrack.id);
         addPoints(currentTrack.points);
