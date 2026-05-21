@@ -1,9 +1,8 @@
 // Home screen - Challenge list (Expo Router)
 import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { ChallengeCard } from '../../components/challenge/ChallengeCard';
-import { useMusicPlayer } from '../../hooks/useMusicPlayer';
+import { ChallengeList } from '../../components/challenge/ChallengeList';
 import { useMusicStore, selectChallenges, selectCurrentTrack, selectIsPlaying } from '../../stores/musicStore';
 import { THEME } from '../../constants/theme';
 import type { MusicChallenge } from '../../types';
@@ -12,26 +11,10 @@ export default function HomeScreen() {
   const challenges = useMusicStore(selectChallenges);
   const currentTrack = useMusicStore(selectCurrentTrack);
   const isPlaying = useMusicStore(selectIsPlaying);
-  const { play } = useMusicPlayer();
 
-  const handlePlayChallenge = async (challenge: MusicChallenge) => {
-    try {
-      await play(challenge);
-      // Navigate to player modal after starting playback
-      router.push('/(modals)/player');
-    } catch (error) {
-      console.error('Failed to play challenge:', error);
-    }
+  const handlePlayChallenge = (challenge: MusicChallenge) => {
+    router.push(`/(modals)/challenge-detail?id=${challenge.id}`);
   };
-
-  const renderChallenge = ({ item }: { item: MusicChallenge }) => (
-    <ChallengeCard
-      challenge={item}
-      onPlay={handlePlayChallenge}
-      isCurrentTrack={currentTrack?.id === item.id}
-      isPlaying={isPlaying}
-    />
-  );
 
   return (
     <View style={styles.container}>
@@ -39,12 +22,11 @@ export default function HomeScreen() {
       <Text style={styles.subtitle}>
         Complete listening challenges to earn points and unlock achievements
       </Text>
-      <FlatList
-        data={challenges}
-        renderItem={renderChallenge}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
+      <ChallengeList
+        challenges={challenges}
+        currentTrackId={currentTrack?.id}
+        isPlaying={isPlaying}
+        onPlay={handlePlayChallenge}
       />
     </View>
   );
@@ -69,8 +51,5 @@ const styles = StyleSheet.create({
     color: THEME.colors.text.secondary,
     textAlign: 'center',
     marginBottom: THEME.spacing.lg,
-  },
-  listContainer: {
-    paddingBottom: THEME.spacing.xl,
   },
 });

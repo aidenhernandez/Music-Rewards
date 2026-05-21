@@ -20,6 +20,13 @@ export default function ModalLayout() {
           headerBackTitle: 'Close',
         }}
       />
+      <Stack.Screen
+        name="challenge-detail"
+        options={{
+          title: 'Challenge Details',
+          headerBackTitle: 'Back',
+        }}
+      />
     </Stack>
   );
 }

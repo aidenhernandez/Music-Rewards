@@ -4,12 +4,10 @@ import { useEffect } from 'react';
 import TrackPlayer from 'react-native-track-player';
 import { setupTrackPlayer } from '../services/audioService';
 
+TrackPlayer.registerPlaybackService(() => require('../services/playbackService'));
+
 export default function RootLayout() {
   useEffect(() => {
-    // Register the playback service first
-    TrackPlayer.registerPlaybackService(() => require('../services/playbackService'));
-    
-    // Then initialize TrackPlayer when app starts
     setupTrackPlayer().catch((error) => {
       console.error('Failed to setup TrackPlayer:', error);
     });

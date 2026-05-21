@@ -4,17 +4,18 @@ import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native
 // TrackPlayer service setup - call this in your App.tsx or _layout.tsx
 export const setupTrackPlayer = async (): Promise<void> => {
   try {
-    // Check if player is already initialized
-    const isSetup = await TrackPlayer.isServiceRunning();
-    if (isSetup) {
-      return;
-    }
-
-    // Setup the player with proper configuration
     await TrackPlayer.setupPlayer({
       waitForBuffer: true,
       maxCacheSize: 1024 * 10, // 10MB
     });
+  } catch (error: any) {
+    // Ignore if player is already initialized (e.g. hot reload)
+    if (error?.message?.includes('already been initialized')) return;
+    console.error('TrackPlayer setup error:', error);
+    throw error;
+  }
+
+  try {
 
     // Configure capabilities
     await TrackPlayer.updateOptions({
