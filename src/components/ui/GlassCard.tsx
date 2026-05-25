@@ -19,6 +19,7 @@ interface GlassCardProps {
   blurIntensity?: number;
   borderRadius?: number;
   style?: ViewStyle;
+  contentStyle?: ViewStyle;
   gradientColors?: readonly string[];
 }
 
@@ -28,6 +29,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   borderRadius = THEME.borderRadius.md,
   gradientColors = THEME.glass.gradientColors.card,
   style,
+  contentStyle,
 }) => {
     return (
       <View style={StyleSheet.flatten([{ borderRadius, overflow: 'hidden' }, style])}>
@@ -51,7 +53,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
           }}
         />
         
-        <View style={styles.contentContainer}>
+        <View style={[styles.contentContainer, contentStyle]}>
           {children}
         </View>
       </View>
@@ -86,6 +88,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
     <GlassCard
       gradientColors={gradientColors}
       style={StyleSheet.flatten([styles.button, style])}
+      contentStyle={styles.buttonContentContainer}
     >
       <TouchableOpacity
         onPress={onPress}
@@ -96,7 +99,14 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
         {loading ? (
           <ActivityIndicator color={THEME.colors.text.primary} size="small" />
         ) : (
-          <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+          <Text
+            style={[styles.buttonText, textStyle]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
+            {title}
+          </Text>
         )}
       </TouchableOpacity>
     </GlassCard>
@@ -108,9 +118,13 @@ const styles = StyleSheet.create({
     padding: THEME.spacing.md,
   },
   button: {
-    height: 48,
+    height: 56,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  buttonContentContainer: {
+    paddingVertical: 0,
+    paddingHorizontal: THEME.spacing.xs,
   },
   buttonContent: {
     width: '100%',

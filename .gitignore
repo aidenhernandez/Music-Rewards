@@ -47,3 +47,6 @@ yarn-error.log*
 .vscode/
 *.swp
 *.swo
+
+# Local docs
+DEVELOPMENT_LOG.md

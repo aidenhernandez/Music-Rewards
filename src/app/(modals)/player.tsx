@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  ScrollView,
   Alert,
   LayoutChangeEvent,
 } from 'react-native';
@@ -105,7 +106,11 @@ export default function PlayerModal() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Track Info */}
         <GlassCard style={styles.trackInfoCard}>
           <Text style={styles.trackTitle}>{currentTrack.title}</Text>
@@ -200,7 +205,7 @@ export default function PlayerModal() {
             </Text>
           </View>
         </GlassCard>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -210,10 +215,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: THEME.colors.background,
   },
-  content: {
+  scroll: {
     flex: 1,
+  },
+  content: {
     padding: THEME.spacing.lg,
-    justifyContent: 'space-between',
+    gap: THEME.spacing.md,
+    paddingBottom: THEME.spacing.xl,
   },
   noTrackCard: {
     margin: THEME.spacing.xl,

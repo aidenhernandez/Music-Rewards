@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "musicrewards-test-app",
+    "name": "MusicRewards",
     "slug": "musicrewards-test-app",
     "version": "1.0.0",
     "platforms": [
@@ -10,11 +10,11 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "musicrewards-test-app",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1a1a1a"
     },
     "ios": {
       "supportsTablet": true,
@@ -23,7 +23,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#1a1a1a"
       },
       "package": "com.wallinex.musicrewardstestapp"
     },
@@ -31,7 +31,8 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-splash-screen"
     ],
     "experiments": {
       "typedRoutes": true
