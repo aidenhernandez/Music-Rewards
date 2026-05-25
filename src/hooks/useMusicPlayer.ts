@@ -34,6 +34,9 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
     if (isCurrentlyPlaying !== isPlaying) {
       setIsPlaying(isCurrentlyPlaying);
     }
+    if (isCurrentlyPlaying) {
+      setError(null);
+    }
   }, [isCurrentlyPlaying, isPlaying, setIsPlaying]);
 
   useEffect(() => {
@@ -54,7 +57,7 @@ export const useMusicPlayer = (): UseMusicPlayerReturn => {
 
   useTrackPlayerEvents([Event.PlaybackError], (event) => {
     if (event.type === Event.PlaybackError) {
-      setError(`Playback error: ${event.message}`);
+      setError("Couldn't load this track. Check your connection and try again.");
       setLoading(false);
     }
   });

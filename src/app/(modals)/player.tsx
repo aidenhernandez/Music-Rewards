@@ -186,7 +186,10 @@ export default function PlayerModal() {
           </View>
 
           {error && (
-            <Text style={styles.errorText}>{error}</Text>
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorIcon}>⚠️</Text>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
           )}
         </GlassCard>
 
@@ -314,11 +317,23 @@ const styles = StyleSheet.create({
     flex: 0.4,
     marginHorizontal: THEME.spacing.xs,
   },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: THEME.spacing.xs,
+    marginTop: THEME.spacing.md,
+    paddingHorizontal: THEME.spacing.sm,
+  },
+  errorIcon: {
+    fontSize: THEME.fonts.sizes.sm,
+    lineHeight: THEME.fonts.sizes.sm * 1.4,
+  },
   errorText: {
+    flex: 1,
     color: '#FF6B6B',
     fontSize: THEME.fonts.sizes.sm,
     textAlign: 'center',
-    marginTop: THEME.spacing.md,
   },
   challengeCard: {
     // Card styling handled by GlassCard

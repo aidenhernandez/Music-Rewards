@@ -1,8 +1,15 @@
 // Root layout for Expo Router
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, LogBox } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
+
+LogBox.ignoreLogs([
+  'getSleepTimerProgress',
+  'setSleepTimer',
+  'sleepWhenActiveTrackReachesEnd',
+  'clearSleepTimer',
+]);
 import TrackPlayer from 'react-native-track-player';
 import { setupTrackPlayer } from '../services/audioService';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
