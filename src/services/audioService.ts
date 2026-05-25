@@ -8,9 +8,9 @@ export const setupTrackPlayer = async (): Promise<void> => {
       waitForBuffer: true,
       maxCacheSize: 1024 * 10, // 10MB
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Ignore if player is already initialized (e.g. hot reload)
-    if (error?.message?.includes('already been initialized')) return;
+    if (error instanceof Error && error.message.includes('already been initialized')) return;
     console.error('TrackPlayer setup error:', error);
     throw error;
   }
@@ -137,16 +137,13 @@ export const getTrackDuration = async (): Promise<number> => {
 };
 
 // Handle playback errors
-export const handlePlaybackError = (error: any) => {
+export const handlePlaybackError = (error: unknown): { message: string; code: string } => {
   console.error('Playback error:', error);
-  
-  // You can add error reporting here
-  // Example: report to crash analytics
-  // crashlytics().recordError(error);
-  
   return {
-    message: error?.message || 'Unknown playback error',
-    code: error?.code || 'UNKNOWN_ERROR',
+    message: error instanceof Error ? error.message : 'Unknown playback error',
+    code: typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code: unknown }).code)
+      : 'UNKNOWN_ERROR',
   };
 };
 
