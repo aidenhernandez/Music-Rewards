@@ -1,81 +1,106 @@
-# MusicRewards Test App
+# MusicRewards
 
-This is the recommended project structure for the Belong React Native assessment. Use this as your starting point!
+MusicRewards is a React Native prototype built for the Belong platform that turns music listening into a reward experience. The core idea: users are presented with music challenges — each one a track worth a set number of points. They tap Play, listen through the audio, and earn points automatically as they progress. Hit 90% of the track and the challenge is marked complete.
 
-## 🚀 Setup Instructions
+The app proves out the full reward loop end-to-end: **browse challenges → play audio → track progress in real time → award points → persist everything across sessions**. It runs on iOS using `react-native-track-player` for native audio with background playback and lock-screen controls, Zustand for state management, and Expo Router for navigation. The UI is built around a frosted-glass design system using Belong's brand colors.
 
-**📖 See [../SETUP.md](../SETUP.md) for complete setup instructions**
+---
 
-This test-app folder contains the complete starter code structure for your MusicRewards implementation. Don't run setup commands from here - follow the main setup guide above.
+---
 
-**Quick Reference:**
+## Requirements
+
+- Node.js 18+
+- Xcode 15+ (iOS)
+- CocoaPods
+- Expo CLI — `npm install -g expo-cli`
+
+---
+
+## Setup
+
 ```bash
-# From the parent react-native/ folder:
-cp -r test-app ~/MusicRewards
-cd ~/MusicRewards
-npx create-expo-app . --template typescript
+# 1. Install dependencies
 npm install
-npx expo start
+
+# 2. Install iOS pods
+cd ios && pod install && cd ..
+
+# 3. Run on iOS
+expo run:ios
 ```
 
-## 📁 Project Structure
+> **Note:** `react-native-track-player` requires a native build — `expo start` (Expo Go) will not work. Always use `expo run:ios`.
 
-This structure follows Belong's mobile app architecture patterns:
+---
+
+## Running the app
+
+```bash
+# iOS simulator
+expo run:ios
+
+# iOS physical device
+expo run:ios --device
+
+# Start Metro bundler only (after native build exists)
+expo start
+```
+
+---
+
+## Project structure
 
 ```
 src/
-├── app/                    # Expo Router pages
+├── app/                        # Expo Router screens
+│   ├── _layout.tsx             # Root layout — TrackPlayer init, providers, splash
 │   ├── (tabs)/
-│   │   ├── index.tsx       # Home screen with challenge list
-│   │   ├── profile.tsx     # Profile with user progress
-│   │   └── _layout.tsx     # Tab navigation setup
-│   ├── (modals)/
-│   │   ├── player.tsx      # Full-screen audio player
-│   │   └── _layout.tsx     # Modal navigation setup
-│   └── _layout.tsx         # Root layout
+│   │   ├── index.tsx           # Home — challenge list
+│   │   └── profile.tsx         # Profile — points and progress summary
+│   └── (modals)/
+│       ├── challenge-detail.tsx # Challenge info and Play CTA
+│       └── player.tsx           # Full-screen audio player
 ├── components/
-│   ├── ui/                 # Glass design system components
-│   │   ├── GlassCard.tsx
-│   │   ├── GlassButton.tsx
-│   │   └── PointsCounter.tsx
-│   └── challenge/          # Challenge-specific components
-│       ├── ChallengeCard.tsx
-│       └── ChallengeList.tsx
-├── hooks/                  # Business logic hooks
-│   ├── useMusicPlayer.ts
-│   ├── usePointsCounter.ts
-│   └── useChallenges.ts
-├── stores/                 # Zustand stores
-│   ├── musicStore.ts
-│   └── userStore.ts
-├── services/               # External services
-│   └── audioService.ts
-├── constants/              # Theme and configuration
-│   └── theme.ts
-└── types/                  # TypeScript definitions
-    └── index.ts
+│   ├── challenge/              # ChallengeCard, ChallengeList
+│   └── ui/                     # GlassCard, GlassButton, PointsCounter, ErrorBoundary
+├── contexts/
+│   └── MusicPlayerContext.tsx  # Singleton hook context
+├── hooks/
+│   ├── useMusicPlayer.ts       # TrackPlayer integration + store sync
+│   ├── useChallenges.ts        # Challenge data access
+│   └── usePointsCounter.ts     # Live points accumulation
+├── services/
+│   ├── audioService.ts         # TrackPlayer setup
+│   └── playbackService.ts      # Background playback event handlers
+├── stores/
+│   ├── musicStore.ts           # Challenges + playback state (Zustand)
+│   └── userStore.ts            # Points + completed IDs (Zustand + AsyncStorage)
+├── constants/
+│   └── theme.ts                # Design tokens + sample challenge data
+└── types/
+    └── index.ts                # Shared TypeScript interfaces
 ```
 
-## 🎵 Audio Files
+---
 
-The assessment uses these pre-hosted tracks:
-- **Track 1:** Camo & Krooked - All Night (3:39, 150 points)
-- **Track 2:** Roni Size - New Forms (7:44, 300 points)
+## Architecture
 
-URLs and sample data are in [`../assets/audio/README.md`](../assets/audio/README.md)
+Two Zustand stores handle all state:
 
-## 🎯 Implementation Order
+- **`musicStore`** — challenge list, current track, playback position. Only the challenges array is persisted; playback state resets on restart.
+- **`userStore`** — total points and completed challenge IDs. Fully persisted to AsyncStorage.
 
-1. **Set up basic navigation structure**
-2. **Create Zustand stores (musicStore.ts, userStore.ts)**
-3. **Build glass design components (GlassCard, GlassButton)**
-4. **Implement useMusicPlayer hook with TrackPlayer**
-5. **Create challenge list and player modal UI**
-6. **Add points counter and progress tracking**
-7. **Test on both platforms and add error handling**
+`useMusicPlayer` is instantiated once at the root layout via `MusicPlayerContext`, so progress tracking runs continuously regardless of which screen is visible. All screens read playback state from store selectors; only the player modal writes to it via the context.
 
-## 📖 Reference
+Points are awarded when a track reaches 90% completion, guarded by a `useRef<Set>` to prevent duplicate awards across progress ticks.
 
-See the main [README.md](../README.md) for detailed technical requirements and evaluation criteria.
+See `ARCHITECTURE.md` for full detail.
 
-Good luck! 🚀🎵
+---
+
+## Known limitations
+
+- **iOS only** — Android has not been tested. TrackPlayer and CocoaPods are configured for iOS; Android Gradle setup is present but unverified.
+- **Sample data** — challenges are hardcoded in `constants/theme.ts`. The `useChallenges` hook is structured for an API swap but no backend exists.
+- **No authentication** — user identity is not implemented; all state is local to the device.
