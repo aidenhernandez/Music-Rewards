@@ -152,3 +152,111 @@ TrackPlayer (native)
 **90% completion threshold** — Avoids edge cases where TrackPlayer's `PlaybackQueueEnded` event fires before `useProgress` reports exactly 100%, which can cause completion to be missed entirely.
 
 **`partialize` for persistence** — Persisting only `challenges` (not playback state) keeps the AsyncStorage footprint small and avoids stale playback state on restart. Progress percentages and points survive restarts; the audio queue does not.
+
+---
+
+## React Native Patterns Reference
+
+Patterns used in this project that are worth knowing.
+
+### Controlled splash screen lifecycle
+
+Call `SplashScreen.preventAutoHideAsync()` at module level (before the root component mounts) to hold the native splash open, then `SplashScreen.hideAsync()` once async initialization is complete. This eliminates the white flash between the OS-level splash and the first React render.
+
+```ts
+SplashScreen.preventAutoHideAsync(); // holds the native splash
+
+useEffect(() => {
+  async function init() {
+    await setupTrackPlayer();        // do async work
+    await SplashScreen.hideAsync();  // release splash only when ready
+    setReady(true);
+  }
+  init();
+}, []);
+```
+
+Pair this with an in-app loading screen (rendered when `ready === false`) so the transition is seamless rather than jumping straight into the main UI.
+
+---
+
+### `onLayout` for dynamic measurements
+
+When a component's rendered size is unknown at write time (different screen widths, font scaling, orientation), use `onLayout` to capture the real dimensions after layout is computed:
+
+```ts
+const [seekBarWidth, setSeekBarWidth] = useState(1);
+
+<View onLayout={(e: LayoutChangeEvent) => setSeekBarWidth(e.nativeEvent.layout.width)} />
+```
+
+Used here to make the seek bar tap-to-seek accurate across all device widths. A hardcoded constant would be wrong on any device that doesn't match the one it was tuned on.
+
+---
+
+### `useRef<Set>` as a render-safe deduplication guard
+
+When a `useEffect` fires on every state update (e.g. every progress tick) but the action inside should only happen once, a `useRef<Set>` is the right guard — it persists across renders without triggering re-renders:
+
+```ts
+const awardedChallenges = useRef<Set<string>>(new Set());
+
+if (progress >= 90 && !awardedChallenges.current.has(id)) {
+  awardedChallenges.current.add(id); // synchronous — blocks the next tick immediately
+  addPoints(points);
+}
+```
+
+Using `useState` here would cause a re-render, which would re-run the effect, defeating the guard. `useRef` updates are synchronous and invisible to React's render cycle.
+
+---
+
+### `adjustsFontSizeToFit` for responsive button labels
+
+When button width is constrained and labels include emoji + text, the text can wrap to a second line. Set `numberOfLines={1}` with `adjustsFontSizeToFit` and `minimumFontScale` to let the label shrink to fit rather than wrap:
+
+```tsx
+<Text
+  numberOfLines={1}
+  adjustsFontSizeToFit
+  minimumFontScale={0.7}
+>
+  ⏪ -10s
+</Text>
+```
+
+`minimumFontScale={0.7}` caps how small the text will shrink (70% of the base size), so it never becomes unreadable.
+
+---
+
+### `contentStyle` escape hatch on composite components
+
+When a component wraps content in a container with fixed padding, inner layout can become constrained in ways callers can't override via the outer `style` prop alone. Adding a `contentStyle` prop exposes the inner container:
+
+```tsx
+// GlassCard: exposes inner padding override
+<View style={[styles.contentContainer, contentStyle]}>
+  {children}
+</View>
+
+// GlassButton: zeroes vertical padding so the button fills its full height
+<GlassCard contentStyle={{ paddingVertical: 0, paddingHorizontal: 4 }}>
+```
+
+This pattern avoids duplicating the component for edge cases while keeping the default behavior intact for all other usages.
+
+---
+
+### `ScrollView` with `gap` for viewport-adaptive layouts
+
+Replacing `justifyContent: 'space-between'` on a fixed `View` with a `ScrollView` + `gap` makes layouts work across all screen sizes:
+
+```tsx
+// Fragile: clips content on short screens, over-spaces on tall ones
+<View style={{ flex: 1, justifyContent: 'space-between' }}>
+
+// Robust: scrolls if needed, consistent spacing everywhere
+<ScrollView contentContainerStyle={{ gap: 16, padding: 24, paddingBottom: 32 }}>
+```
+
+`space-between` distributes whatever space is available — it compresses cards on small screens and spreads them too far on large ones. `gap` keeps spacing predictable regardless of viewport height.
